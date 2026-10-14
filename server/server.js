@@ -8,13 +8,30 @@ const userRoutes = require("./routes/userRoute");
 const suggestionRoutes = require("./routes/suggestionRoute");
 
 const app = express();
-connectDB();
+let databaseConnection;
+
+function ensureDatabaseConnection() {
+  if (!databaseConnection) {
+    databaseConnection = connectDB().catch((error) => {
+      databaseConnection = undefined;
+      throw error;
+    });
+  }
+  return databaseConnection;
+}
 
 app.use(express.json());
-app.use(cors());
+const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim());
+app.use(cors({ origin: allowedOrigins }));
 
 app.get("/api", (req, res) => {
   res.send("Nutrition Assistant API is running");
+});
+
+app.use((req, res, next) => {
+  ensureDatabaseConnection().then(() => next()).catch(next);
 });
 
 app.use("/api/users", userRoutes);
@@ -29,6 +46,15 @@ app.get(/^\/(?!api).*/, (req, res) => {
 
 const PORT = process.env.PORT || 9000;
 
-app.listen(PORT, () => {
-  console.log(`Listening on ${PORT}`);
-});
+if (require.main === module) {
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET must be set before starting the server");
+  }
+  ensureDatabaseConnection().then(() => {
+    app.listen(PORT, () => {
+      console.log(`Listening on ${PORT}`);
+    });
+  });
+}
+
+module.exports = app;

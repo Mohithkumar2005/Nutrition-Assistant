@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../api';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -10,10 +11,10 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('/api/users/login', formData);
+      const res = await axios.post(`${API_BASE_URL}/api/users/login`, formData);
       localStorage.setItem('token', res.data.token);
       navigate('/home');
-    } catch (err) {
+    } catch {
       alert("Invalid Credentials");
     }
   };

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import UnavBar from './UnavBar';
+import { API_BASE_URL } from '../../../api';
 
 const UserData = () => {
   const [userData, setUserData] = useState(null);
@@ -9,7 +10,7 @@ const UserData = () => {
   useEffect(() => {
     const fetchUser = async () => {
       const token = localStorage.getItem('token');
-      const res = await axios.get('/api/users/profile', {
+      const res = await axios.get(`${API_BASE_URL}/api/users/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUserData(res.data);

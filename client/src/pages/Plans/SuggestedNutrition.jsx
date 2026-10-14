@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import MealCard from '../../components/MealCard';
+import { API_BASE_URL } from '../../api';
 
 const SuggestedNutrition = () => {
   const [plan, setPlan] = useState(null);
@@ -10,11 +11,11 @@ const SuggestedNutrition = () => {
     const fetchPlan = async () => {
       const token = localStorage.getItem('token');
       try {
-        const res = await axios.get('/api/suggestions/latest', {
+        const res = await axios.get(`${API_BASE_URL}/api/suggestions/latest`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setPlan(res.data);
-      } catch (err) {
+      } catch {
         console.error("No plan found");
       }
     };

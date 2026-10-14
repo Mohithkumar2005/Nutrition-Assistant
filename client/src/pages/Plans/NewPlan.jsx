@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../../api';
 
 const NewPlan = () => {
   const [stats, setStats] = useState({
@@ -18,7 +19,7 @@ const NewPlan = () => {
     e.preventDefault();
     const token = localStorage.getItem('token');
     try {
-      await axios.post('/api/suggestions/generate', stats, {
+      await axios.post(`${API_BASE_URL}/api/suggestions/generate`, stats, {
         headers: { Authorization: `Bearer ${token}` }
       });
       navigate('/plans/suggested');

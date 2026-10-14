@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
  * Generate JWT Token
  */
 const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '30d' });
+    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 
 /**
@@ -14,9 +14,6 @@ const generateToken = (id) => {
  * @route POST /api/users/register
  */
 const registerUser = async (req, res) => {
-    console.log("========== REGISTER ROUTE HIT ==========");
-    console.log("Request Body:", req.body);
-
     try {
         const {
             name,
@@ -30,11 +27,7 @@ const registerUser = async (req, res) => {
             goal
         } = req.body;
 
-        console.log("Checking if user exists...");
-
         const userExists = await User.findOne({ email });
-
-        console.log("User exists:", userExists);
 
         if (userExists) {
             return res.status(400).json({
@@ -42,12 +35,8 @@ const registerUser = async (req, res) => {
             });
         }
 
-        console.log("Hashing password...");
-
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-
-        console.log("Creating user...");
 
         const user = await User.create({
             name,
@@ -61,8 +50,6 @@ const registerUser = async (req, res) => {
             goal
         });
 
-        console.log("User created successfully!");
-
         res.status(201).json({
             _id: user._id,
             name: user.name,
@@ -71,8 +58,7 @@ const registerUser = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("REGISTER ERROR:");
-        console.error(error);
+        console.error("Registration failed:", error.message);
 
         res.status(500).json({
             message: error.message
@@ -109,7 +95,7 @@ const loginUser = async (req, res) => {
  * @route GET /api/users/profile
  */
 const getUserProfile = async (req, res) => {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id).select('-password');
     if (user) {
         res.json(user);
     } else {
