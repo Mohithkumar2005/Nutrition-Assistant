@@ -1,38 +1,57 @@
 const Suggestion = require('../models/Suggestion');
 const suggestNutrition = require('../utils/suggestNutrition');
 
-const buildMeals = ({ calories, macros }) => ([
-    {
-        type: 'Breakfast',
-        items: ['oats', 'banana', 'Greek yogurt'],
-        calories: Math.round(calories * 0.3),
-        macros: {
-            protein: Math.round(macros.protein * 0.3),
-            carbs: Math.round(macros.carbs * 0.35),
-            fats: Math.round(macros.fats * 0.25)
+const buildMeals = ({ calories, macros }) => {
+    const lunchProteinTarget = Math.round(macros.protein * 0.4);
+    // Approximate protein from 1 cup cooked lentils, 1 cup cooked rice,
+    // and 1 cup mixed vegetables. Food and preparation values vary.
+    const lunchBaseProtein = 25;
+    const additionalProtein = Math.max(0, lunchProteinTarget - lunchBaseProtein);
+    const roundUpToTen = (grams) => Math.ceil(grams / 10) * 10;
+    const chickenGrams = roundUpToTen((additionalProtein / 32) * 100);
+    const paneerGrams = roundUpToTen((additionalProtein / 16) * 100);
+    const lunchProteinOption = additionalProtein > 0
+        ? `Choose one to approach the ${lunchProteinTarget}g protein target: about ${chickenGrams}g cooked chicken breast OR ${paneerGrams}g paneer.`
+        : `The suggested rice, dal, and vegetables provide about ${lunchBaseProtein}g protein; adjust portions to suit the ${lunchProteinTarget}g target.`;
+
+    return [
+        {
+            type: 'Breakfast',
+            items: ['oats', 'banana', 'Greek yogurt'],
+            calories: Math.round(calories * 0.3),
+            macros: {
+                protein: Math.round(macros.protein * 0.3),
+                carbs: Math.round(macros.carbs * 0.35),
+                fats: Math.round(macros.fats * 0.25)
+            }
+        },
+        {
+            type: 'Lunch',
+            items: [
+                'Rice (1 cup cooked, about 4g protein)',
+                'Dal (1 cup cooked, about 18g protein)',
+                'Mixed vegetables (1 cup, about 3g protein)',
+                lunchProteinOption
+            ],
+            calories: Math.round(calories * 0.4),
+            macros: {
+                protein: lunchProteinTarget,
+                carbs: Math.round(macros.carbs * 0.4),
+                fats: Math.round(macros.fats * 0.4)
+            }
+        },
+        {
+            type: 'Dinner',
+            items: ['roti or quinoa', 'paneer or lean protein', 'salad'],
+            calories: Math.round(calories * 0.3),
+            macros: {
+                protein: Math.round(macros.protein * 0.3),
+                carbs: Math.round(macros.carbs * 0.25),
+                fats: Math.round(macros.fats * 0.35)
+            }
         }
-    },
-    {
-        type: 'Lunch',
-        items: ['rice', 'dal or beans', 'mixed vegetables'],
-        calories: Math.round(calories * 0.4),
-        macros: {
-            protein: Math.round(macros.protein * 0.4),
-            carbs: Math.round(macros.carbs * 0.4),
-            fats: Math.round(macros.fats * 0.4)
-        }
-    },
-    {
-        type: 'Dinner',
-        items: ['roti or quinoa', 'paneer or lean protein', 'salad'],
-        calories: Math.round(calories * 0.3),
-        macros: {
-            protein: Math.round(macros.protein * 0.3),
-            carbs: Math.round(macros.carbs * 0.25),
-            fats: Math.round(macros.fats * 0.35)
-        }
-    }
-]);
+    ];
+};
 
 /**
  * @desc Generate and save nutrition suggestion based on user profile
