@@ -27,8 +27,9 @@ const buildMeals = ({ calories, macros }, dietType = 'vegetarian') => {
             return `The base foods provide about ${Math.round(baseProtein)} g protein, already meeting the ${target} g meal target; skip the extra protein option.`;
         }
         if (dietType === 'non-vegetarian') {
-            const grams = servingToTarget(target, baseProtein, proteinPer100g.cookedChicken);
-            return `Cooked chicken breast — ${grams} g (~${proteinForServing(grams, proteinPer100g.cookedChicken)} g protein; ~30 g per 100 g).`;
+            const chickenGrams = servingToTarget(target, baseProtein, proteinPer100g.cookedChicken);
+            const paneerGrams = servingToTarget(target, baseProtein, proteinPer100g.paneer);
+            return `Choose one: cooked chicken breast — ${chickenGrams} g (~${proteinForServing(chickenGrams, proteinPer100g.cookedChicken)} g protein; ~30 g per 100 g) OR paneer — ${paneerGrams} g (~${proteinForServing(paneerGrams, proteinPer100g.paneer)} g protein; ~20 g per 100 g).`;
         }
         const grams = servingToTarget(target, baseProtein, proteinPer100g.paneer);
         return `Paneer — ${grams} g (~${proteinForServing(grams, proteinPer100g.paneer)} g protein; ~20 g per 100 g).`;
