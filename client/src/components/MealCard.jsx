@@ -13,18 +13,21 @@ const MealCard = ({ mealType, foodItems, calories, macros }) => {
           <li key={index} className="list-disc ml-4 capitalize">{item}</li>
         ))}
       </ul>
+      <p className="mb-3 text-xs leading-relaxed text-gray-500">
+        Meal targets are allocated from your daily goals. Actual nutrition depends on the foods and portion sizes you choose.
+      </p>
       <div className="grid grid-cols-3 gap-2 pt-4 border-t border-gray-100 text-center text-xs">
         <div>
           <p className="font-bold text-gray-800">{macros.protein}g</p>
-          <p className="text-gray-400">Protein</p>
+          <p className="text-gray-400">Protein target</p>
         </div>
         <div>
           <p className="font-bold text-gray-800">{macros.carbs}g</p>
-          <p className="text-gray-400">Carbs</p>
+          <p className="text-gray-400">Carbs target</p>
         </div>
         <div>
           <p className="font-bold text-gray-800">{macros.fats}g</p>
-          <p className="text-gray-400">Fats</p>
+          <p className="text-gray-400">Fats target</p>
         </div>
       </div>
     </div>
