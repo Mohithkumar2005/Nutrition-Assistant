@@ -29,6 +29,11 @@ const SuggestionSchema = new mongoose.Schema(
       fats: Number,
     },
     recommendations: String,
+    dietType: {
+      type: String,
+      enum: ["vegetarian", "non-vegetarian"],
+      default: "vegetarian",
+    },
     meals: {
       type: [MealSchema],
       default: [],

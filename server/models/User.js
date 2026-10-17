@@ -24,6 +24,11 @@ const UserSchema = new mongoose.Schema(
     gender: String,
     activityLevel: String,
     goal: String,
+    dietType: {
+      type: String,
+      enum: ["vegetarian", "non-vegetarian"],
+      default: "vegetarian",
+    },
   },
   {
     timestamps: true,

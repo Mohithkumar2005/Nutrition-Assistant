@@ -11,7 +11,8 @@ const NewPlan = () => {
     weight: '',
     height: '',
     goal: 'lose',
-    activityLevel: 'sedentary'
+    activityLevel: 'sedentary',
+    dietType: 'vegetarian'
   });
   const navigate = useNavigate();
 
@@ -32,6 +33,13 @@ const NewPlan = () => {
     <div className="max-w-xl mx-auto mt-10 p-8 bg-white rounded-xl shadow-lg border border-gray-100">
       <h2 className="text-2xl font-bold text-emerald-600 mb-6">Generate Nutrition Plan</h2>
       <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Food preference</label>
+          <select className="w-full p-2 border rounded mt-1" value={stats.dietType} onChange={(e) => setStats({...stats, dietType: e.target.value})}>
+            <option value="vegetarian">Vegetarian (no meat, fish, or eggs)</option>
+            <option value="non-vegetarian">Non-Vegetarian (includes eggs and chicken)</option>
+          </select>
+        </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Weight (kg)</label>
           <input type="number" min="20" className="w-full p-2 border rounded mt-1" required onChange={(e) => setStats({...stats, weight: e.target.value})} />
