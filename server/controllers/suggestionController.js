@@ -2,25 +2,62 @@ const Suggestion = require('../models/Suggestion');
 const suggestNutrition = require('../utils/suggestNutrition');
 
 const buildMeals = ({ calories, macros }) => {
+    // Rounded planning estimates; actual values vary by food, brand, and cooking method.
+    const proteinPer100g = {
+        oats: 13,
+        banana: 1.1,
+        egg: 12.6,
+        greekYogurt: 10,
+        cookedRice: 2.7,
+        cookedDal: 9,
+        vegetables: 2,
+        cookedChicken: 30,
+        paneer: 20,
+        cookedQuinoa: 4.4,
+        salad: 2
+    };
+    const servingToTarget = (target, baseProtein, density, step = 5) => {
+        const remainingProtein = Math.max(0, target - baseProtein);
+        return Math.ceil((remainingProtein / (density / 100)) / step) * step;
+    };
+    const proteinForServing = (grams, density) => Math.round(grams * density / 100);
+    const proteinOption = (target, baseProtein) => {
+        if (target <= baseProtein) {
+            return `The base foods provide about ${Math.round(baseProtein)} g protein, already meeting the ${target} g meal target; skip the extra protein option.`;
+        }
+        const chickenGrams = servingToTarget(target, baseProtein, proteinPer100g.cookedChicken);
+        const paneerGrams = servingToTarget(target, baseProtein, proteinPer100g.paneer);
+        return `Choose one: cooked chicken breast — ${chickenGrams} g (~${proteinForServing(chickenGrams, proteinPer100g.cookedChicken)} g protein; ~30 g per 100 g) OR paneer — ${paneerGrams} g (~${proteinForServing(paneerGrams, proteinPer100g.paneer)} g protein; ~20 g per 100 g).`;
+    };
+
+    const breakfastProteinTarget = Math.round(macros.protein * 0.3);
+    const breakfastEggCount = breakfastProteinTarget >= 19 ? 2 : 1;
+    const breakfastBaseProtein = proteinForServing(40, proteinPer100g.oats)
+        + proteinForServing(120, proteinPer100g.banana)
+        + breakfastEggCount * (50 * proteinPer100g.egg / 100);
+    const yogurtGrams = servingToTarget(breakfastProteinTarget, breakfastBaseProtein, proteinPer100g.greekYogurt, 10);
+
     const lunchProteinTarget = Math.round(macros.protein * 0.4);
-    // Approximate protein from 1 cup cooked lentils, 1 cup cooked rice,
-    // and 1 cup mixed vegetables. Food and preparation values vary.
-    const lunchBaseProtein = 25;
-    const additionalProtein = Math.max(0, lunchProteinTarget - lunchBaseProtein);
-    const roundUpToTen = (grams) => Math.ceil(grams / 10) * 10;
-    const chickenGrams = roundUpToTen((additionalProtein / 32) * 100);
-    const paneerGrams = roundUpToTen((additionalProtein / 16) * 100);
-    const lunchProteinOption = additionalProtein > 0
-        ? `Choose one to approach the ${lunchProteinTarget}g protein target: about ${chickenGrams}g cooked chicken breast OR ${paneerGrams}g paneer.`
-        : `The suggested rice, dal, and vegetables provide about ${lunchBaseProtein}g protein; adjust portions to suit the ${lunchProteinTarget}g target.`;
+    const lunchBaseProtein = proteinForServing(150, proteinPer100g.cookedRice)
+        + proteinForServing(150, proteinPer100g.cookedDal)
+        + proteinForServing(150, proteinPer100g.vegetables);
+
+    const dinnerProteinTarget = Math.round(macros.protein * 0.3);
+    const dinnerBaseProtein = proteinForServing(150, proteinPer100g.cookedQuinoa)
+        + proteinForServing(150, proteinPer100g.salad);
 
     return [
         {
             type: 'Breakfast',
-            items: ['oats', 'banana', 'Greek yogurt'],
+            items: [
+                'Rolled oats, dry — 40 g (~5 g protein)',
+                'Banana, edible portion — 120 g (~1 g protein)',
+                `Large eggs — ${breakfastEggCount} (~${breakfastEggCount * 50} g edible; ~${breakfastEggCount * 6} g protein)`,
+                ...(yogurtGrams > 0 ? [`Plain Greek yogurt — ${yogurtGrams} g (~${proteinForServing(yogurtGrams, proteinPer100g.greekYogurt)} g protein; check the package label, as brands vary)`] : [])
+            ],
             calories: Math.round(calories * 0.3),
             macros: {
-                protein: Math.round(macros.protein * 0.3),
+                protein: breakfastProteinTarget,
                 carbs: Math.round(macros.carbs * 0.35),
                 fats: Math.round(macros.fats * 0.25)
             }
@@ -28,10 +65,10 @@ const buildMeals = ({ calories, macros }) => {
         {
             type: 'Lunch',
             items: [
-                'Rice (1 cup cooked, about 4g protein)',
-                'Dal (1 cup cooked, about 18g protein)',
-                'Mixed vegetables (1 cup, about 3g protein)',
-                lunchProteinOption
+                'Cooked rice — 150 g (~4 g protein)',
+                'Cooked dal — 150 g (~14 g protein)',
+                'Cooked mixed vegetables — 150 g (~3 g protein)',
+                proteinOption(lunchProteinTarget, lunchBaseProtein)
             ],
             calories: Math.round(calories * 0.4),
             macros: {
@@ -42,10 +79,14 @@ const buildMeals = ({ calories, macros }) => {
         },
         {
             type: 'Dinner',
-            items: ['roti or quinoa', 'paneer or lean protein', 'salad'],
+            items: [
+                'Cooked quinoa — 150 g (~7 g protein)',
+                'Salad vegetables — 150 g (~3 g protein)',
+                proteinOption(dinnerProteinTarget, dinnerBaseProtein)
+            ],
             calories: Math.round(calories * 0.3),
             macros: {
-                protein: Math.round(macros.protein * 0.3),
+                protein: dinnerProteinTarget,
                 carbs: Math.round(macros.carbs * 0.25),
                 fats: Math.round(macros.fats * 0.35)
             }

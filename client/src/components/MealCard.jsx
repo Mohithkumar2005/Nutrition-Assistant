@@ -14,7 +14,7 @@ const MealCard = ({ mealType, foodItems, calories, macros }) => {
         ))}
       </ul>
       <p className="mb-3 text-xs leading-relaxed text-gray-500">
-        Meal targets are allocated from your daily goals. Actual nutrition depends on the foods and portion sizes you choose.
+        Calories and macros are meal targets. Food weights and protein are estimates; chicken is weighed cooked. Check yogurt and paneer labels because brands vary.
       </p>
       <div className="grid grid-cols-3 gap-2 pt-4 border-t border-gray-100 text-center text-xs">
         <div>
